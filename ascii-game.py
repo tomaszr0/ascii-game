@@ -56,6 +56,7 @@ class gameEngine:
     # def _init_ /
 
     def printMap(self):
+        msg = ""
         for y in range(len(self.map)):
             line = ""
             for x in range(len(self.map[y])):
@@ -63,29 +64,66 @@ class gameEngine:
                     line += "P"
                 else:
                     line += self.mapNodeTypes[self.map[y][x]]["character"]
-            print(line)
+            msg += line + "\n"
+        return msg
     # def printMap /
 
     def main(self):
         while 1:
-            print ("Legend:\nP\tplayer")
-            for a in self.mapNodeTypes:
-                print (a['character'] + "\t" + a['name'])
-            print("\n")
-            self.printMap()
-            print("\nWhat do you want to do? (Type one of the commands in the square brackets)\n[N]\tMove north\n[E]\tMove east\n[S]\tMove south\n[W]\tMove west\n")
-            command = input(">> ").upper()
-            if command == 'N':
-                self.player['y'] -= 1
-            if command == 'E':
-                self.player['x'] += 1
-            if command == 'S':
-                self.player['y'] += 1
-            if command == 'W':
-                self.player['x'] -= 1
-                
-    
+            msg, commands = self.travel()
+            msg += "\nWhat do you want to do? (Type one of the commands in the square brackets)\n"
+            options = []
+            for cmd in commands:
+                msg += '['+cmd['letter']+']\t' + cmd['desc'] + '\n'
+                options.append(cmd['letter'])
+            msg += "\n>> "
+            
+            while 1:
+                command = input(msg).upper()
+                if command in options:
+                    break
+                print('Enter the correct command.')
+                time.sleep(1)
+            self.travel(1, command)
     # def main /
+
+    def travel(self, mode = 0, cmd = ""):
+        if mode == 0:
+            msg = ""
+            msg += ("Legend:\nP\tplayer\n")
+            for a in self.mapNodeTypes:
+                msg += (a['character'] + "\t" + a['name']) + "\n"
+            msg += ("\n")
+            msg += self.printMap()
+
+            commands = []
+            x = self.player['x']
+            y = self.player['y']
+            m = self.map
+            t = self.mapNodeTypes
+            if y > 0:
+                if t[m[y-1][x]]['traversable'] == 1:
+                    commands.append({'letter':'W', 'desc':'move North'})
+            if y < self.height-1:
+                if t[m[y+1][x]]['traversable'] == 1:
+                    commands.append({'letter':'S', 'desc':'move South'})
+            if x > 0:
+                if t[m[y][x-1]]['traversable'] == 1:
+                    commands.append({'letter':'A', 'desc':'move West'})
+            if x < self.width-1:
+                if t[m[y][x+1]]['traversable'] == 1:
+                    commands.append({'letter':'D', 'desc':'move East'})
+            return msg, commands
+        
+        if cmd == 'W':
+            self.player['y'] -= 1
+        elif cmd == 'D':
+            self.player['x'] += 1
+        elif cmd == 'S':
+            self.player['y'] += 1
+        elif cmd == 'A':
+            self.player['x'] -= 1
+    # def travel /
     
 # class gameEngine /
 
